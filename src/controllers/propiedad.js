@@ -1,85 +1,52 @@
 const Propiedad = require("../models/propiedad");
 
+
+
 const getPropiedades = async(req, res) => {
     const { limit, offset, operacion, tipo, precioMin, precioMax } = req.query;
     try {
-        let resp;
         let propiedades;
+        let filtros = {};
 
-        resp = await Propiedad.find();
         //filtros
         //por operacion
         if(operacion){
-            propiedades = resp.filter(p => 
-                p.operacion.some(item => item.operacion === operacion)
-            );
+            filtros.operacion = operacion; 
+        }
+        //tipo
+        if(tipo){
+            filtros.tipo = tipo;
+        }
+        //precio MIN
+        if(precioMin){
+            filtros.precio = {...filtros.precio, $gte: Number(precioMin)};
+        }
+        //precio MAX
+        if(precioMax){
+            filtros.precio = {...filtros.precio, $lte: Number(precioMax)};
         }
         
-        res.json(resp);
+        propiedades = await Propiedad.find(filtros)
+        .skip(Number(offset) || 0)
+        .limit(Number(limit) || 12)
+        .exec();
+
+        //obtengo el total de props q cumplen con los filtros (sin paginación)
+        const totPropsFiltradas = await Propiedad.countDocuments(filtros);
+
+        //envio las 12 props mas el total de las q cumplen los filtros
+        res.send(200).json({
+            totPropsFiltradas,
+            propiedades
+        });
     } catch (error) {
         console.log(error);
+        res.status(500).json({ message: 'Error al obtener las propiedades' });
     }
 };
 
 const createPropiedad = async(req, res) => {
-    const {
-        codigoReferencia,
-        tituloPublicacion,
-        descripcion,
-        tipoPropiedad,
-        expesnsas,
-        ubicacion,
-        operacion,
-        cantPisos,
-        ambientes,
-        dormitorios,
-        baños,
-        imagenes,
-        videos,
-        supCubierta,
-        supSemiCub,
-        supDescubierta,
-        supTotal,
-        unidadMedida,
-        servicios,
-        estado,
-        antiguedad,
-        cantCocheras,
-    } = req.body;  //console.log("data:", req.body)
-
-    try {
-        const nuevaProp = new Propiedad({
-            codigoReferencia,
-            tituloPublicacion,
-            descripcion,
-            tipoPropiedad,
-            expesnsas,
-            ubicacion,
-            operacion,
-            cantPisos,
-            ambientes,
-            dormitorios,
-            baños,
-            imagenes,
-            videos,
-            supCubierta,
-            supSemiCub,
-            supDescubierta,
-            supTotal,
-            unidadMedida,
-            servicios,
-            estado,
-            antiguedad,
-            cantCocheras,
-        });
-
-        await nuevaProp.save();
-
-        res.status(200).send("Prop creada con exito!!");
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Error del servidor");
-    }
+    
 };
 
 
