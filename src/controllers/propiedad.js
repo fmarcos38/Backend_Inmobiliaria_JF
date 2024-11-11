@@ -45,61 +45,6 @@ const getPropiedades = async(req, res) => {
     }
 };
 
-const createPropiedad = async(req, res) => {
-    const {
-        tituloPublicacion,
-        descripcion,
-        tipoPropiedad,
-        expesnsas,
-        cantPisos,
-        ambientes,
-        dormitorios,
-        baños,
-        supCubierta,
-        supSemiCub,
-        supDescubierta,
-        supTotal,
-        estado,
-        antiguedad,
-        cantCocheras,
-        operacion,
-        ubicacion,
-        imagenes,
-        video,
-        servicios
-    } = req.body; console.log("Data:",req.body);
-
-    try {
-        const propiedad = new Propiedad({
-            tituloPublicacion: tituloPublicacion,
-            descripcion: descripcion,
-            tipoPropiedad: tipoPropiedad,
-            operacion: operacion,
-            ubicacion: ubicacion,
-            expesnsas: expesnsas,
-            cantPisos: cantPisos,
-            ambientes: ambientes,
-            dormitorios: dormitorios,
-            baños: baños,
-            supCubierta: supCubierta,
-            supSemiCub: supSemiCub,
-            supDescubierta: supDescubierta,
-            supTotal: supTotal,
-            estado: estado,
-            antiguedad: antiguedad,
-            cantCocheras: cantCocheras,
-            imagenes: imagenes,
-            video: video,
-            servicios: servicios
-        });
-
-        await propiedad.save();
-        res.status(201).json({ mensaje: "Propiedad creada con éxito" });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ mensaje: "Error del servidor" });
-    }
-};
 
 
 module.exports = {
