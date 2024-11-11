@@ -12,7 +12,7 @@ const router = express.Router();
 router.get('/', getPropiedades);
 
 //crea
-router.post('/', /* upload.fields([{ name: 'imagenes' }, { name: 'video' }]), */ async (req, res) => {
+router.post('/', upload.fields([{ name: 'imagenes' }, { name: 'video' }]), async (req, res) => {
     const {
         tituloPublicacion,
         descripcion,
@@ -32,12 +32,11 @@ router.post('/', /* upload.fields([{ name: 'imagenes' }, { name: 'video' }]), */
         estado,
         antiguedad,
         cantCocheras,
-    } = req.body;
-    console.log("data:", req.body.data);
+    } = JSON.parse(req.body.data); // Parsear los datos del formulario
 
     try {
         // Subir imágenes a Cloudinary
-        /* const imagenesUrls = await Promise.all(
+        const imagenesUrls = await Promise.all(
             (req.files['imagenes'] || []).map((file) => {
                 return new Promise((resolve, reject) => {
                     const uploadStream = cloudinary.uploader.upload_stream(
@@ -50,10 +49,10 @@ router.post('/', /* upload.fields([{ name: 'imagenes' }, { name: 'video' }]), */
                     uploadStream.end(file.buffer); // Enviar buffer a Cloudinary
                 });
             })
-        ); */
+        );
 
         // Subir el video a Cloudinary, si existe
-        /* let videoUrl = null;
+        let videoUrl = null;
         if (req.files['video'] && req.files['video'][0]) {
             const videoResult = await new Promise((resolve, reject) => {
                 const uploadStream = cloudinary.uploader.upload_stream(
@@ -66,7 +65,7 @@ router.post('/', /* upload.fields([{ name: 'imagenes' }, { name: 'video' }]), */
                 uploadStream.end(req.files['video'][0].buffer);
             });
             videoUrl = videoResult;
-        } */
+        }
 
         // Obtener el último código de referencia o generar uno nuevo
         const lastPropiedad = await Propiedad.findOne().sort({ codigoReferencia: -1 });
@@ -85,8 +84,8 @@ router.post('/', /* upload.fields([{ name: 'imagenes' }, { name: 'video' }]), */
             ambientes,
             dormitorios,
             baños,
-            //imagenes: imagenesUrls,
-            //video: videoUrl,
+            imagenes: imagenesUrls,
+            video: videoUrl,
             supCubierta,
             supSemiCub,
             supDescubierta,
