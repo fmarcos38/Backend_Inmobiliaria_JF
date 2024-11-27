@@ -1,5 +1,5 @@
 const express = require('express');
-const { createPropiedad, getPropiedades } = require('../controllers/propiedad');
+const {  getPropiedades, getPropiedad } = require('../controllers/propiedad');
 const Propiedad = require("../models/propiedad");
 const cloudinary = require('../config/cloudinary');
 const upload = require('../config/multer'); 
@@ -10,6 +10,9 @@ const router = express.Router();
 
 //trae props
 router.get('/', getPropiedades);
+
+//trae propiedad por id
+router.get('/:id', getPropiedad);
 
 //crea
 router.post('/', upload.fields([{ name: 'imagenes' }, { name: 'video' }]), async (req, res) => {
@@ -32,7 +35,8 @@ router.post('/', upload.fields([{ name: 'imagenes' }, { name: 'video' }]), async
         estado,
         antiguedad,
         cantCocheras,
-    } = JSON.parse(req.body.data); // Parsear los datos del formulario
+    } = JSON.parse(req.body.data); // Parsear los datos del formulario 
+    console
 
     try {
         // Subir imágenes a Cloudinary
