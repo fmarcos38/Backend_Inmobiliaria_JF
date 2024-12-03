@@ -2,7 +2,7 @@ const Propiedad = require("../models/propiedad");
 
 
 const getPropiedades = async(req, res) => {
-    const { limit, offset, operacion, tipo, precioMin, precioMax } = req.query; 
+    const { limit, offset, operacion, tipo, precioMin, precioMax } = req.query; console.log("quwery:",req.query);
     try {
         let propiedades;
         let filtros = {};
@@ -13,7 +13,7 @@ const getPropiedades = async(req, res) => {
             filtros["operacion.tipoOperacion"] = operacion; 
         }
         //tipo
-        if(tipo){
+        if(tipo && tipo !== "todos"){
             filtros.tipoPropiedad = tipo;
         }
         //precio MIN
@@ -23,10 +23,6 @@ const getPropiedades = async(req, res) => {
         //precio MAX
         if(precioMax){
             filtros["operacion.precio"] = {...filtros["operacion.precio"], $lte: Number(precioMax)};
-        }
-        //sin filtros
-        if(!operacion && !tipo && !precioMin && !precioMax){
-            filtros = {};
         }
 
         propiedades = await Propiedad.find(filtros)
