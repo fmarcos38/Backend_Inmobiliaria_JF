@@ -5,8 +5,9 @@ const PropiedadSchema = Schema({
     tituloPublicacion: { type: String },
     descripcion: { type: String },
     tipoPropiedad: { type: String },
-    venta: { type: Object }, 
-    alquiler: { type: Object },    
+    operacion: { type: String },
+    precioVenta: { type: Number },
+    precioAlquiler: { type: Number },    
     ubicacion: { type: Object }, //direc real, direc publi, pais, prov, ciudad, barrio    
     cantPisos: { type: Number},
     ambientes: { type: Number},
