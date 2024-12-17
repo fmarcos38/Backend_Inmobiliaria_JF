@@ -230,6 +230,7 @@ const eliminarImagenCloudinary = async (publicId) => {
         console.error('Error al eliminar la imagen en Cloudinary:', error.message);
     }
 };
+
 //elimina propiedad y eliminiar imagenes y video de cloudinary
 router.delete('/eliminaProp/:_id', async (req, res) => {
     const { _id } = req.params; 
@@ -250,7 +251,7 @@ router.delete('/eliminaProp/:_id', async (req, res) => {
                       .replace(/v\d+\//, '') // Eliminar la versión "v123456789/"
                       .split('.')[0]         // Eliminar la extensión del archivo
                   );        // Eliminar la extensión del archivo
-                console.log('Public ID extraído:', public_id);
+                //console.log('Public ID extraído:', public_id);
                 await eliminarImagenCloudinary(public_id);
             }
         }
