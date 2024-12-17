@@ -1,9 +1,8 @@
 const Propiedad = require("../models/propiedad");
 
-
 const getPropiedades = async (req, res) => {
     const { limit, offset, operacion, tipo, precioMin, precioMax } = req.query;
-    console.log("query:", req.query);
+
     try {
         let propiedades;
         let filtros = {};
@@ -17,9 +16,14 @@ const getPropiedades = async (req, res) => {
         if (tipo && tipo !== "todos") {
             filtros.tipoPropiedad = tipo;
         }
-        
-
-        console.log("Filtros aplicados:", filtros);
+        // Precio MIN
+        if (precioMin) {
+            filtros.precio = { $gte: precioMin };            
+        }
+        // Precio MAX
+        if (precioMax ) {
+            filtros.precio = { ...filtros.precio, $lte: precioMax };            
+        }
 
         // Realizar la consulta con los filtros aplicados
         propiedades = await Propiedad.find(filtros)

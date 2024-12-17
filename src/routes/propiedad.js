@@ -20,11 +20,10 @@ router.post('/', upload.fields([{ name: 'imagenes' }, { name: 'video' }]), async
         tituloPublicacion,
         descripcion,
         tipoPropiedad,
-        expensas,
-        ubicacion,
         operacion,
-        precioVenta,
-        precioAlquiler,
+        moneda,
+        precio,
+        ubicacion,
         cantPisos,
         ambientes,
         dormitorios,
@@ -36,6 +35,7 @@ router.post('/', upload.fields([{ name: 'imagenes' }, { name: 'video' }]), async
         servicios,
         estado,
         antiguedad,
+        expensas,
         cantCocheras,
     } = JSON.parse(req.body.data); // Parsear los datos del formulario 
 
@@ -80,27 +80,27 @@ router.post('/', upload.fields([{ name: 'imagenes' }, { name: 'video' }]), async
         const nuevaProp = new Propiedad({
             codigoReferencia,
             tituloPublicacion,
-            descripcion,
             tipoPropiedad,
-            expensas,
-            ubicacion,
             operacion,
-            precioVenta,
-            precioAlquiler,
-            cantPisos,
-            ambientes,
-            dormitorios,
-            baños,
-            imagenes: imagenesUrls,
-            video: videoUrl,
-            supCubierta,
-            supSemiCub,
-            supDescubierta,
-            supTotal,
+            moneda,
+            precio,
+            descripcion,            
+            ubicacion,
+            cantPisos: cantPisos || 0,
+            ambientes: ambientes || 0,
+            dormitorios: dormitorios || 0,
+            baños: baños || 0,
+            supCubierta : supCubierta || 0,
+            supSemiCub: supSemiCub || 0,
+            supDescubierta: supDescubierta || 0,
+            supTotal: supTotal || 0,
             servicios,
             estado,
             antiguedad,
-            cantCocheras,
+            expensas,
+            cantCocheras: cantCocheras || 0,
+            imagenes: imagenesUrls,
+            video: videoUrl,
         });
 
         // Guardar la nueva propiedad en la base de datos
@@ -126,8 +126,8 @@ router.put('/editaProp/:_id', upload.fields([{ name: 'imagenes' }, { name: 'vide
         expensas,
         ubicacion,
         operacion,
-        precioVenta,
-        precioAlquiler,
+        moneda,
+        precio,
         cantPisos,
         ambientes,
         dormitorios,
@@ -141,7 +141,7 @@ router.put('/editaProp/:_id', upload.fields([{ name: 'imagenes' }, { name: 'vide
         antiguedad,
         cantCocheras,
     } = JSON.parse(req.body.data); // Parsear los datos del formulario
-    
+
     try {
         // Buscar la propiedad por ID
         const propiedad = await Propiedad.findById(_id);
@@ -180,8 +180,8 @@ router.put('/editaProp/:_id', upload.fields([{ name: 'imagenes' }, { name: 'vide
             expensas,
             ubicacion,
             operacion,
-            precioVenta,
-            precioAlquiler,
+            moneda,
+            precio,
             cantPisos,
             ambientes,
             dormitorios,
@@ -211,6 +211,25 @@ router.put('/editaProp/:_id', upload.fields([{ name: 'imagenes' }, { name: 'vide
     }
 });
 
+// Función para eliminar una imagen en Cloudinary
+const eliminarImagenCloudinary = async (publicId) => {
+    try {
+        console.log('Intentando eliminar la imagen con public_id:', publicId);
+
+        // Asegúrate de esperar la resolución de la promesa
+        const result = await cloudinary.uploader.destroy(publicId);
+
+        console.log('Resultado de Cloudinary:', result);
+
+        if (result.result === 'ok') {
+            console.log('Imagen eliminada correctamente.');
+        } else {
+            console.log('No se pudo eliminar la imagen. Detalles:', result.result);
+        }
+    } catch (error) {
+        console.error('Error al eliminar la imagen en Cloudinary:', error.message);
+    }
+};
 //elimina propiedad y eliminiar imagenes y video de cloudinary
 router.delete('/eliminaProp/:_id', async (req, res) => {
     const { _id } = req.params; 
@@ -220,14 +239,21 @@ router.delete('/eliminaProp/:_id', async (req, res) => {
         if (!propiedad) {
             return res.status(404).send("Propiedad no encontrada");
         }
-
+        
         // Eliminar las imágenes de Cloudinary
-        await Promise.all(
-            propiedad.imagenes.map((imagen) => {
-                const public_id = imagen.split('/').slice(-1)[0].split('.')[0];
-                return cloudinary.uploader.destroy(public_id);
-            })
-        );
+        if (propiedad.imagenes && propiedad.imagenes.length > 0) {
+            for (const imagen of propiedad.imagenes) {
+                // Extraer el public_id correcto
+                const public_id = decodeURIComponent(
+                    imagen
+                      .split('/upload/')[1]  // Obtener la parte después de "upload/"
+                      .replace(/v\d+\//, '') // Eliminar la versión "v123456789/"
+                      .split('.')[0]         // Eliminar la extensión del archivo
+                  );        // Eliminar la extensión del archivo
+                console.log('Public ID extraído:', public_id);
+                await eliminarImagenCloudinary(public_id);
+            }
+        }
 
         // Eliminar el video de Cloudinary
         if (propiedad.video) {
