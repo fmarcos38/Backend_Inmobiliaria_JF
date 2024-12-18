@@ -3,7 +3,7 @@ const CryptoJS = require('crypto-js');
 const jwt = require('jsonwebtoken');
 
 //login
-const login = async (req, res) => {
+const login = async (req, res) => { 
     try {
         //busco user (tiene q existir para pooder log)
         const user = await Usuario.findOne({ email: req.body.email });
